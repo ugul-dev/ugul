@@ -1,0 +1,47 @@
+# .github/workflows/newsletter.yml
+#
+# Two-Agent Newsletter Pipeline — Sompo APAC HR Intelligence
+#
+# Schedule: Every Monday at 02:00 UTC = 10:00 SGT
+#
+# Required GitHub repository secrets:
+#   ANTHROPIC_API_KEY      — for both Agent 1 (Writer) and Agent 2 (Auditor)
+#   GMAIL_CLIENT_ID        — Gmail OAuth2 client ID
+#   GMAIL_CLIENT_SECRET    — Gmail OAuth2 client secret
+#   GMAIL_REFRESH_TOKEN    — Gmail OAuth2 refresh token
+
+name: Sompo APAC HR Intelligence — Weekly Newsletter
+
+on:
+  schedule:
+    - cron: '0 2 * * 1'   # Monday 02:00 UTC = 10:00 SGT
+  workflow_dispatch:        # Manual trigger from GitHub UI
+
+jobs:
+  newsletter-pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run two-agent pipeline (Writer → Auditor → Gmail Draft)
+        env:
+          ANTHROPIC_API_KEY:    ${{ secrets.ANTHROPIC_API_KEY }}
+          GMAIL_CLIENT_ID:      ${{ secrets.GMAIL_CLIENT_ID }}
+          GMAIL_CLIENT_SECRET:  ${{ secrets.GMAIL_CLIENT_SECRET }}
+          GMAIL_REFRESH_TOKEN:  ${{ secrets.GMAIL_REFRESH_TOKEN }}
+        run: npm run generate
+
+      - name: Log completion
+        run: echo "✅ Pipeline completed at $(date -u '+%Y-%m-%d %H:%M UTC') = $(TZ='Asia/Singapore' date '+%H:%M SGT')"
