@@ -1,0 +1,19 @@
+{
+  "name": "sompo-apac-hr-intelligence",
+  "version": "2.0.0",
+  "description": "Two-agent pipeline: Writer + Auditor → Sompo APAC HR Intelligence newsletter → Gmail draft",
+  "main": "scripts/orchestrator.js",
+  "scripts": {
+    "generate": "node scripts/orchestrator.js",
+    "writer-only": "node -e \"require('./scripts/agent1_writer').generateContent().then(c => console.log(JSON.stringify(c,null,2)))\"",
+    "audit-test": "node scripts/orchestrator.js",
+    "auth": "node scripts/get_gmail_token.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.0",
+    "googleapis": "^140.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
